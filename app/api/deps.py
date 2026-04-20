@@ -8,11 +8,12 @@ from app.services.openrouter_client import OpenRouterClient
 from app.usecases.auth import AuthUsecase
 from app.usecases.chat import ChatUsecase
 from app.core.security import decode_access_token
+from typing import AsyncGenerator
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-async def get_db() -> AsyncSession:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         try:
             yield session
