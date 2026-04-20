@@ -8,6 +8,7 @@ class AuthUsecase:
     def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
 
+
     async def register(self, email: str, password: str) -> User:
         user = await self.user_repository.get_by_email(email)
         if user:
@@ -16,6 +17,7 @@ class AuthUsecase:
             hashed_pswd = hash_password(password)
             return await self.user_repository.create(email=email, password_hash=hashed_pswd)
 
+
     async def login(self, email: str, password: str) -> str:
         user = await self.user_repository.get_by_email(email)
         if not user:
@@ -23,3 +25,10 @@ class AuthUsecase:
         if not verify_password(password, user.password_hash):
             raise UnauthorizedError("Wrong password")
         return create_access_token(data={"sub": user.id})
+
+
+    async def get_profile(self, user_id: int) -> User:
+        user = await self.user_repository.get_by_id(user_id)
+        if not user:
+            raise NotFoundError("User not found")
+        return user
