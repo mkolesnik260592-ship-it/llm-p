@@ -9,6 +9,8 @@ class ChatMessagesRepository:
         self.session = session
 
     async def add_message(self, user_id: int, role: str, content: str) -> ChatMessage:
+        """Добавляет новое сообщение в историю. Возвращает созданное сообщение."""
+
         new_message = ChatMessage(
             user_id=user_id,
             role=role,
@@ -20,6 +22,8 @@ class ChatMessagesRepository:
         return new_message
 
     async def get_history(self, user_id: int, limit: int = 10) -> List[ChatMessage]:
+        """Возвращает последние limit сообщений пользователя, отсортированные по времени."""
+
         history = (
             select(ChatMessage)
             .where(ChatMessage.user_id == user_id)
@@ -29,5 +33,7 @@ class ChatMessagesRepository:
         return result.scalars().all()
 
     async def delete_history(self, user_id: int) -> None:
+        """Удаляет все сообщения пользователя из истории."""
+
         await self.session.execute(delete(ChatMessage).where(ChatMessage.user_id == user_id))
         await self.session.commit()

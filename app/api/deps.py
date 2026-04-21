@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import AsyncSessionLocal
 from app.repositories.users import UserRepository
@@ -11,9 +11,12 @@ from app.core.security import decode_access_token
 from typing import AsyncGenerator
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
+security_scheme = HTTPBearer(auto_error=False)
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """Возвращает сессию базы данных. Закрывает сессию после завершения запроса."""
+
     async with AsyncSessionLocal() as session:
         try:
             yield session
@@ -43,12 +46,22 @@ async def get_chat_usecase(
         ) -> ChatUsecase:
     return ChatUsecase(chat_repo, openrouter_client)
 
+async def get_current_user_id(
+    token_oauth: str = Depends(oauth2_scheme),
+    token_bearer: HTTPAuthorizationCredentials = Depends(security_scheme)
+) -> int:
+    """Извлекает и валидирует JWT токен. Возвращает user_id текущего пользователя."""
 
-async def get_current_user_id(token: str = Depends(oauth2_scheme)) -> int:
+    token = token_oauth or (token_bearer.credentials if token_bearer else None)
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
     payload = decode_access_token(token)
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid token")
+
     user_id = payload.get("sub")
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token payload")
+
     return int(user_id)

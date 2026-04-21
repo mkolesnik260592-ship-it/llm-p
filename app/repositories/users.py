@@ -8,16 +8,22 @@ class UserRepository:
         self.session = session
 
     async def get_by_email(self, email: str) -> User | None:
+        """Возвращает пользователя по email или None."""
+
         query = select(User).where(User.email == email)
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
     async def get_by_id(self, user_id: int) -> User | None:
+        """Возвращает пользователя по ID или None."""
+
         query = select(User).where(User.id == user_id)
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
     async def create(self, email: str, password_hash: str) -> User:
+        """Создаёт и сохраняет нового пользователя. Возвращает созданного пользователя."""
+
         new_user = User(
             email=email,
             password_hash=password_hash

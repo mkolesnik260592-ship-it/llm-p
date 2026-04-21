@@ -10,6 +10,8 @@ class AuthUsecase:
 
 
     async def register(self, email: str, password: str) -> User:
+        """Регистрация нового пользователя. Проверяет уникальность email, хеширует пароль."""
+
         user = await self.user_repository.get_by_email(email)
         if user:
             raise ConflictError("User with this email already exists")
@@ -19,15 +21,19 @@ class AuthUsecase:
 
 
     async def login(self, email: str, password: str) -> str:
+        """Аутентификация пользователя. Возвращает JWT токен при успехе."""
+
         user = await self.user_repository.get_by_email(email)
         if not user:
             raise UnauthorizedError("User with this email not found")
         if not verify_password(password, user.password_hash):
             raise UnauthorizedError("Wrong password")
-        return create_access_token(data={"sub": user.id})
+        return create_access_token(data={"sub": str(user.id)})
 
 
     async def get_profile(self, user_id: int) -> User:
+        """Возвращает профиль пользователя по ID."""
+
         user = await self.user_repository.get_by_id(user_id)
         if not user:
             raise NotFoundError("User not found")

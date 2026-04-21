@@ -16,6 +16,8 @@ class ChatUsecase:
             system: str = None,
             max_history: int = 10,
             temperature: float = 0.7) -> str:
+        """Отправляет запрос к LLM, сохраняет вопрос и ответ в истории. Возвращает ответ модели."""
+
         messages = []
         if system:
             system_msg = {
@@ -30,13 +32,17 @@ class ChatUsecase:
             "content": prompt}
         messages.append(user_message)
 
-        user_ask = await self.chat_repository.add_message(user_id=user_id, role="user", content=prompt)
+        await self.chat_repository.add_message(user_id=user_id, role="user", content=prompt)
         answer = await self.openrouter_client.chat_completion(messages, temperature=temperature)
-        assis_answ = await self.chat_repository.add_message(user_id=user_id, role="assistant", content=answer)
-        return assis_answ
+        await self.chat_repository.add_message(user_id=user_id, role="assistant", content=answer)
+        return answer
 
     async def get_history(self, user_id: int, limit: int = 10) -> List[ChatMessage]:
+        """Возвращает последние limit сообщений пользователя."""
+
         return await self.chat_repository.get_history(user_id, limit)
 
     async def clear_history(self, user_id: int) -> None:
+        """Удаляет всю историю сообщений пользователя."""
+
         await self.chat_repository.delete_history(user_id)

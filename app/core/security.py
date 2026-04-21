@@ -8,7 +8,7 @@ from app.core.config import settings
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str) -> str:
-    """Хеширует пароль"""
+    """Хеширует пароль с помощью bcrypt."""
     return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -31,9 +31,10 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
     return encoded_jwt
 
 def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
-    """Декодирует и валидирует JWT токен"""
+    """Декодирует и валидирует JWT токен. Возвращает payload или None."""
     try:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_alg])
         return payload
-    except JWTError:
+    except JWTError as e:
+        print(f"JWT Error details: {e}")
         return None

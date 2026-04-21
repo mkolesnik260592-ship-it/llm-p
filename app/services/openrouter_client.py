@@ -15,6 +15,8 @@ class OpenRouterClient:
         }
 
     async def chat_completion(self, messages: list, model: str = None, temperature: float = 0.7) -> str:
+        """Отправляет запрос к LLM. Возвращает текст ответа модели."""
+
         target_model = model or self.default_model
         payload = {
             "model": target_model,
