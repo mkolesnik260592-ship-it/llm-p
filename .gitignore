@@ -1,0 +1,34 @@
+# Виртуальное окружение
+.venv/
+venv/
+env/
+
+# Кэш Python
+__pycache__/
+*.pyc
+*.pyo
+.ruff_cache/
+
+# База данных
+app.db
+*.db
+*.sqlite
+
+# Секреты и конфиги
+.env
+.env.local
+.env.production
+
+# Логи и временные файлы
+*.log
+*.tmp
+
+# Файлы IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Документация сборки
+uv.lock
+requirements.txt
